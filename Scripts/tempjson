@@ -1,0 +1,77 @@
+(OS: 
+[
+    {
+        'name': 'Android 10 - 12 (Linux 4.14 - 4.19)',
+        'accuracy': '100',
+        'line': '71590',
+        'osclass': 
+        [
+            {
+                'type': 'phone',
+                'vendor': 'Linux', 
+                'osfamily': 'Linux'
+                'osgen': '4.X'
+                'accuracy': '100'
+                'cpe': 
+                [
+                    'cpe:/o:linux:linux_kernel:4'
+                ]
+            }
+            {
+                'type': 'phone'
+                'vendor': 'Google'
+                
+                'osfamily': 'Android'
+                'osgen': '10.X'
+                'accuracy': '100'
+                'cpe': 
+                [
+                    'cpe:/o:google:android:10'
+                ]
+            },
+            {
+                'type': 'phone'
+                'vendor': 'Google'
+                'osfamily': 'Android'
+                'osgen': '11.X'
+                'accuracy': '100'
+                'cpe': 
+                [
+                    'cpe:/o:google:android:11'
+                ]
+            },
+            {
+                'type': 'phone'
+                'vendor': 'Google'
+                'osfamily': 'Android'
+                'osgen': '12.X'
+                'accuracy': '100'
+                'cpe': 
+                [
+                    'cpe:/o:google:android:12'
+                ]
+            }
+        ]
+    }
+])
+{'192.168.1.68,135': {'192.168.1.68': {'OSfamily': 'Windows',
+                                       'OSgen': '11',
+                                       'OSname': 'Microsoft Windows 10 1607 - '
+                                                 '11 23H2',
+                                       'VMname': [{'name': '', 'type': ''}],
+                                       'hostname': '',
+                                       'protocol': {'tcp': {135: 'open',
+                                                            139: 'open',
+                                                            445: 'open',
+                                                            902: 'open',
+                                                            912: 'open',
+                                                            2008: 'open',
+                                                            2179: 'open',
+                                                            2869: 'open',
+                                                            5357: 'open',
+                                                            5800: 'open',
+                                                            5900: 'open',
+                                                            7070: 'open'}},
+                                       'state': 'up',
+                                       'type': 'general purpose',
+                                       'vendor': 'Microsoft'}}}
