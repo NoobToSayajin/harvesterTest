@@ -1,5 +1,8 @@
 import re
 import logging
+import json
+import requests
+import os
 import queue
 import threading
 from logging.handlers import TimedRotatingFileHandler
@@ -35,6 +38,8 @@ stream_handler.setFormatter(formater)
 logger_main.addHandler(stream_handler)
 
 # ---------- App ----------
+URL: str = "192.168.1.1"
+JSON_FILE: str = "Export\\scan.json"
 resultQueue = queue.Queue()
 
 def getVersion() -> str:
@@ -48,8 +53,17 @@ def startScan(targets: list[str]) -> dict[str, dict]:
     timer = getattr(scanner.scan, 'Debug.Log.Timer', None)
     return result, timer
 
-def scanInit():
-    pass
+def sendToServer(file, url):
+    if not os.path.exists(file):
+        logger_main.debug(f"Fichier {file} introuvable.")
+    with open(file, "r"):
+        data = json.load(file)
+    response: requests.Response = requests.post(url=url, json=file)#, data=data)
+    logger_main.debug(f"Réponse du serveur: {response.status_code} - {response.text}")
+
+def scanToJson(data: dict):
+    with open(JSON_FILE, "w") as f:
+        json.dump(data, f, indent=4)
 
 def checkTargetNet(void = None) -> bool:
     IP_REGEX = r"^(\d{1,3}\.){3}\d{1,3}$"
@@ -90,6 +104,8 @@ def checkTargetNet(void = None) -> bool:
         def check_result():
             try:
                 resultat, timer = resultQueue.get_nowait()  # Récupère les données sans bloquer
+                scanToJson(resultat)
+                sendToServer(JSON_FILE, URL)
                 logger_main.debug(f"Résultat du scan : {pprint.pformat(resultat)}")
                 
                 labelResult.configure(text=f"Scan terminé en: {timer}", bg_color=color1)
