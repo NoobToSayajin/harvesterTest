@@ -12,6 +12,7 @@ import customtkinter as ctk
 from PIL import ImageFont
 
 import Scripts.Script_nmap
+import Scripts.Latency
 import Debug.Log
 
 # ---------- log ----------
@@ -41,10 +42,20 @@ logger_main.addHandler(stream_handler)
 URL: str = "192.168.1.1"
 JSON_FILE: str = "Export\\scan.json"
 resultQueue = queue.Queue()
+HOST: str = "google.com"
+latency = Scripts.Latency.Latency(HOST)
 
 def getVersion() -> str:
     with open("version", "r") as file:
         return file.read()
+
+def getLatency() -> float:
+    global latency
+    global labelLatency
+    # labelLatency = ctk.CTkLabel(tabScan1, text=f"Latence 8.8.8.8: {latency.ping():9.4f} ms")
+    labelLatency.configure(text=f"Latence {HOST:>15}: {latency.ping():9.4f} ms")
+    
+    root.after(1000, getLatency)
 
 def startScan(targets: list[str]) -> dict[str, dict]:
     # ma fonction très longue en durée
@@ -56,13 +67,16 @@ def startScan(targets: list[str]) -> dict[str, dict]:
 def sendToServer(file, url):
     if not os.path.exists(file):
         logger_main.debug(f"Fichier {file} introuvable.")
+        return
     with open(file, "r"):
+        logger_main.debug(f"File: {file}")
         data = json.load(file)
     response: requests.Response = requests.post(url=url, json=file)#, data=data)
     logger_main.debug(f"Réponse du serveur: {response.status_code} - {response.text}")
 
 def scanToJson(data: dict):
     with open(JSON_FILE, "w") as f:
+        logger_main.debug(f"Copie du résultat en json dans {JSON_FILE}")
         json.dump(data, f, indent=4)
 
 def checkTargetNet(void = None) -> bool:
@@ -105,7 +119,7 @@ def checkTargetNet(void = None) -> bool:
             try:
                 resultat, timer = resultQueue.get_nowait()  # Récupère les données sans bloquer
                 scanToJson(resultat)
-                sendToServer(JSON_FILE, URL)
+                # sendToServer(JSON_FILE, URL)
                 logger_main.debug(f"Résultat du scan : {pprint.pformat(resultat)}")
                 
                 labelResult.configure(text=f"Scan terminé en: {timer}", bg_color=color1)
@@ -121,6 +135,13 @@ def checkTargetNet(void = None) -> bool:
                 # labelResult.configure(text=f"Scan terminé : {pprint.pformat(resultat)}", bg_color=color1)
             except queue.Empty:
                 targetNetEntry.after(100, check_result)  # Continue à vérifier toutes les 100ms
+            except Exception as e:
+                logger_main.error(f"Erreur: {e}")
+                labelResult.configure(text="❌ Erreur", bg_color="red")
+                targetNetBtn.configure(state="normal")
+                targetHostBtn.configure(state="normal")
+                targetNetEntry.configure(state="normal")
+                targetHostEntry.configure(state="normal")
 
         check_result()  # Lance la vérification immédiate
         # labelResult.configure(text="", bg_color="transparent")
@@ -219,7 +240,7 @@ tabScan = ctk.CTkTabview(root)
 tabScan.pack(expand=True, fill="both", anchor="w")
 
 tabScan1: ctk.CTkFrame = tabScan.add("Scan")
-tabScan2: ctk.CTkFrame = tabScan.add("Result")
+# tabScan2: ctk.CTkFrame = tabScan.add("Result")
 
 for col in range(4):
     tabScan1.grid_columnconfigure(col, weight=1, uniform="equal")
@@ -249,9 +270,12 @@ targetHostBtn.bind("<Enter>", lambda e: onHoverIn(targetHostBtn))
 targetHostBtn.bind("<Leave>", lambda e: onHoverOut(targetHostBtn))
 
 labelResult = ctk.CTkLabel(tabScan1, text="")
-labelResult.grid(row=2, columnspan=4)
+labelResult.grid(row=3, columnspan=4)
 
+labelLatency = ctk.CTkLabel(tabScan1, text=f"Latence {HOST:>15}:  ms")
+labelLatency.grid(row=2, columnspan=4, pady=10, padx=5, sticky="w")
 
+root.after(1000, getLatency)
 # for i, btn in enumerate(btnLst):
 #     btn.bind("<Enter>", lambda e: onHoverIn(btn))
 #     btn.bind("<Leave>", lambda e: onHoverOut(btn))

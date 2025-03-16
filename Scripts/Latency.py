@@ -44,11 +44,14 @@ class Latency:
             echoReply: Packet | None = sr1(packet, self.__timeout, verbose=False)
             latency.append((time.time()-t0)) # en secondes
         
-        return latency
+        return (sum(latency)/len(latency))*1000 # en millisecondes
     
 if __name__=="__main__":
-    pck = IP(dst="8.8.8.8")/ICMP()
-    t0 = time.time()
-    reply = sr1(pck, timeout=5, verbose=False)
-    print(f"{(time.time()-t0):.5f}")
-    print(reply)
+    # pck = IP(dst="8.8.8.8")/ICMP()
+    # t0 = time.time()
+    # reply = sr1(pck, timeout=5, verbose=False)
+    # print(f"{(time.time()-t0):.5f}")
+    # print(reply)
+    p = Latency("8.8.8.8")
+    p.ping()
+    print(p.ping())

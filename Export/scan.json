@@ -1,0 +1,26 @@
+{
+    "192.168.1.83": {
+        "192.168.1.83": {
+            "OSfamily": "Linux",
+            "OSgen": "5.X",
+            "type": "general purpose",
+            "vendor": "Linux",
+            "hostname": "",
+            "VMname": [
+                {
+                    "name": "",
+                    "type": ""
+                }
+            ],
+            "state": "up",
+            "OSname": "Linux 4.15 - 5.19",
+            "protocol": {
+                "tcp": {
+                    "22": "open",
+                    "25": "open",
+                    "80": "open"
+                }
+            }
+        }
+    }
+}
