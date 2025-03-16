@@ -1,10 +1,10 @@
 {
-    "192.168.1.83": {
-        "192.168.1.83": {
-            "OSfamily": "Linux",
-            "OSgen": "5.X",
+    "192.168.1.68": {
+        "192.168.1.68": {
+            "OSfamily": "Windows",
+            "OSgen": "11",
             "type": "general purpose",
-            "vendor": "Linux",
+            "vendor": "Microsoft",
             "hostname": "",
             "VMname": [
                 {
@@ -13,12 +13,21 @@
                 }
             ],
             "state": "up",
-            "OSname": "Linux 4.15 - 5.19",
+            "OSname": "Microsoft Windows 10 1607 - 11 23H2",
             "protocol": {
                 "tcp": {
-                    "22": "open",
-                    "25": "open",
-                    "80": "open"
+                    "135": "open",
+                    "139": "open",
+                    "445": "open",
+                    "902": "open",
+                    "912": "open",
+                    "2008": "open",
+                    "2179": "open",
+                    "2869": "open",
+                    "5357": "open",
+                    "5800": "open",
+                    "5900": "open",
+                    "7070": "open"
                 }
             }
         }

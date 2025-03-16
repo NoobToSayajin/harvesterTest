@@ -52,7 +52,7 @@ def getVersion() -> str:
 def getLatency() -> float:
     global latency
     global labelLatency
-    # labelLatency = ctk.CTkLabel(tabScan1, text=f"Latence 8.8.8.8: {latency.ping():9.4f} ms")
+    # labelLatency = ctk.CTkLabel(scroll_frame, text=f"Latence 8.8.8.8: {latency.ping():9.4f} ms")
     labelLatency.configure(text=f"Latence {HOST:>15}: {latency.ping():9.4f} ms")
     
     root.after(1000, getLatency)
@@ -104,9 +104,9 @@ def checkTargetNet(void = None) -> bool:
         targetNetEntry.configure(border_color="gray")
         labelResult.configure(text="Lancement du scan", bg_color="green")
         targetNetBtn.configure(state="disabled")
-        targetHostBtn.configure(state="disabled")
+        # targetHostBtn.configure(state="disabled")
         targetNetEntry.configure(state="disabled")
-        targetHostEntry.configure(state="disabled")
+        # targetHostEntry.configure(state="disabled")
                 
         labelResult.configure(text="Scan en cours ...", bg_color="#fe6807")
         thread = threading.Thread(
@@ -124,14 +124,17 @@ def checkTargetNet(void = None) -> bool:
                 
                 labelResult.configure(text=f"Scan terminé en: {timer}", bg_color=color1)
                 targetNetBtn.configure(state="normal")
-                targetHostBtn.configure(state="normal")
+                # targetHostBtn.configure(state="normal")
                 targetNetEntry.configure(state="normal")
-                targetHostEntry.configure(state="normal")
+                # targetHostEntry.configure(state="normal")
+                
+                global row
+                drawResult(resultat, row)
 
-                global txtBoxResult
-                txtBoxResult = ctk.CTkTextbox(tabScan1)
-                txtBoxResult.grid(row=3, columnspan=4, sticky="nsew", padx=10, pady=10)
-                txtBoxResult.insert("1.0", f"{pprint.pformat(resultat, 4)}")
+                # global txtBoxResult
+                # txtBoxResult = ctk.CTkTextbox(scroll_frame)
+                # txtBoxResult.grid(row=3, columnspan=4, sticky="nsew", padx=10, pady=10)
+                # txtBoxResult.insert("1.0", f"{pprint.pformat(resultat, 4)}")
                 # labelResult.configure(text=f"Scan terminé : {pprint.pformat(resultat)}", bg_color=color1)
             except queue.Empty:
                 targetNetEntry.after(100, check_result)  # Continue à vérifier toutes les 100ms
@@ -148,6 +151,55 @@ def checkTargetNet(void = None) -> bool:
     else:
         targetNetEntry.configure(border_color="red")
         labelResult.configure(text="❌ Adresse invalide", bg_color="red")
+
+def drawResult(data: dict, row: int = 0) -> None:
+    # name = next(iter(data))
+    # label = ctk.CTkLabel(scroll_frame, text=f"{name:>15}")
+    # label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=10)
+    # row = 3
+    for name, detail in data.items():
+        hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color1, fg_color=color1)
+        hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+        row += 1
+        label = ctk.CTkLabel(scroll_frame, text=f"Résultat du scan du réseaux ou hôte: {name:>15}")
+        label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+        row += 1
+        for ip, info in detail.items():
+            # label = ctk.CTkLabel(scroll_frame, text=f"{name:>15}: {ip}")
+            hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color3, fg_color=color3)
+            hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+            row += 1
+            label = ctk.CTkLabel(scroll_frame, text=f"\tIP: {ip}")#, text_color=color1)
+            label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=5)
+            row += 1
+            for key, value in info.items():
+                if isinstance(value, dict):
+                    label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:")
+                    label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                    row += 1
+                    for k, v in value.items():
+                        if isinstance(v, dict):
+                            label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t{k}:")
+                            label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                            row += 1
+                            for i, j in v.items():
+                                print(f"{name:>15}: {key} -> {k} -> {i} -> {j}")
+                                # label = ctk.CTkLabel(scroll_frame, text=f"{name:>15}: {key} -> {k} -> {i}: {j}")
+                                label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t\t{i}: {j}")
+                                label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                row += 1
+                        else:
+                            print(f"{name:>15}: {key} -> {k} -> {v}")
+                            # label = ctk.CTkLabel(scroll_frame, text=f"{name:>15}: {key} -> {k} -> {v}")
+                            label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key} -> {k} -> {v}")
+                            label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                            row += 1
+                else:
+                    print(f"{name:>15}: {key} -> {value}")
+                    label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:\t {value}")
+                    # label = ctk.CTkLabel(scroll_frame, text=f"{name:>15}: {key} -> {value}")
+                    label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                    row += 1
 
 def checkTargetHost(void = None) -> bool:
     HOSTNAME_REGEX = r"^[a-zA-Z0-9.-]+$"
@@ -237,48 +289,216 @@ quitBtn.bind("<Leave>", lambda e: onHoverOut(quitBtn))
 # ---------- tab ----------
 txtBoxResult: ctk.CTkTextbox = None
 tabScan = ctk.CTkTabview(root)
+# tabScan.grid_rowconfigure(0, weight=1)
+# tabScan.grid_columnconfigure(0, weight=1)
 tabScan.pack(expand=True, fill="both", anchor="w")
 
 tabScan1: ctk.CTkFrame = tabScan.add("Scan")
+# tabScan1 = ctk.CTkFrame(tabScan)
+# tabScan1.grid(row=0, column=0, sticky="nsew")
+tabScan1.grid_rowconfigure(0, weight=1)
+tabScan1.grid_columnconfigure(0, weight=1)
+# tabScan1.grid(row=0, column=0, sticky="nsew")
+
+
+scroll_frame = ctk.CTkScrollableFrame(tabScan1)
+scroll_frame.grid(row=0, column=0, sticky="nsew")
+# scroll_frame.pack(expand=True, fill="both")
 # tabScan2: ctk.CTkFrame = tabScan.add("Result")
 
 for col in range(4):
-    tabScan1.grid_columnconfigure(col, weight=1, uniform="equal")
+    scroll_frame.grid_columnconfigure(col, weight=1, uniform="equal")
 
-targetNetLabel = ctk.CTkLabel(tabScan1, text="Réseaux à scanner: ")
-targetNetLabel.grid(row=0, column=0, pady=10, padx=5, sticky="e")
+row = 0
 
-targetNetEntry = ctk.CTkEntry(tabScan1, placeholder_text="0.0.0.0/0", placeholder_text_color="gray")
-targetNetEntry.grid(row=0, column=1, pady=10, padx=5, sticky="w")
+targetNetLabel = ctk.CTkLabel(scroll_frame, text="Réseaux à scanner: ")
+targetNetLabel.grid(row=row, column=0, pady=10, padx=5, sticky="e")
+
+targetNetEntry = ctk.CTkEntry(scroll_frame, placeholder_text="0.0.0.0/0", placeholder_text_color="gray")
+targetNetEntry.grid(row=row, column=1, pady=10, padx=5, sticky="w")
 targetNetEntry.bind("<Return>", checkTargetNet)
 
-targetNetBtn = ctk.CTkButton(tabScan1, text="Lancer le scan NMAP", command=checkTargetNet)
-targetNetBtn.grid(row=1, column=0, columnspan=2, pady=10, padx=5)
+row += 1
+
+targetNetBtn = ctk.CTkButton(scroll_frame, text="Lancer le scan NMAP", command=checkTargetNet)
+targetNetBtn.grid(row=row, column=0, columnspan=2, pady=10, padx=5)
 targetNetBtn.bind("<Enter>", lambda e: onHoverIn(targetNetBtn))
 targetNetBtn.bind("<Leave>", lambda e: onHoverOut(targetNetBtn))
 
-targetHostLabel = ctk.CTkLabel(tabScan1, text="Nom d'hôte à scanner: ")
-targetHostLabel.grid(row=0, column=2, pady=10, padx=5, sticky="e")
+# targetHostLabel = ctk.CTkLabel(scroll_frame, text="Nom d'hôte à scanner: ")
+# targetHostLabel.grid(row=0, column=2, pady=10, padx=5, sticky="e")
 
-targetHostEntry = ctk.CTkEntry(tabScan1, placeholder_text="host.lan", placeholder_text_color="gray")
-targetHostEntry.grid(row=0, column=3, pady=10, padx=5, sticky="w")
-targetHostEntry.bind("<Return>", checkTargetHost)
+# targetHostEntry = ctk.CTkEntry(scroll_frame, placeholder_text="host.lan", placeholder_text_color="gray")
+# targetHostEntry.grid(row=0, column=3, pady=10, padx=5, sticky="w")
+# targetHostEntry.bind("<Return>", checkTargetHost)
 
-targetHostBtn = ctk.CTkButton(tabScan1, text="Lancer le scan NMAP", command=checkTargetHost)
-targetHostBtn.grid(row=1, column=2, columnspan=2, pady=10, padx=5)
-targetHostBtn.bind("<Enter>", lambda e: onHoverIn(targetHostBtn))
-targetHostBtn.bind("<Leave>", lambda e: onHoverOut(targetHostBtn))
+# targetHostBtn = ctk.CTkButton(scroll_frame, text="Lancer le scan NMAP", command=checkTargetHost)
+# targetHostBtn.grid(row=1, column=2, columnspan=2, pady=10, padx=5)
+# targetHostBtn.bind("<Enter>", lambda e: onHoverIn(targetHostBtn))
+# targetHostBtn.bind("<Leave>", lambda e: onHoverOut(targetHostBtn))
 
-labelResult = ctk.CTkLabel(tabScan1, text="")
-labelResult.grid(row=3, columnspan=4)
+row += 1
 
-labelLatency = ctk.CTkLabel(tabScan1, text=f"Latence {HOST:>15}:  ms")
-labelLatency.grid(row=2, columnspan=4, pady=10, padx=5, sticky="w")
+labelLatency = ctk.CTkLabel(scroll_frame, text=f"Latence {HOST:>15}:  ms")
+labelLatency.grid(row=row, columnspan=4, pady=10, padx=5, sticky="w")
+
+row += 1
+
+labelResult = ctk.CTkLabel(scroll_frame, text="")
+labelResult.grid(row=row, columnspan=4)
+row += 1
 
 root.after(1000, getLatency)
 # for i, btn in enumerate(btnLst):
 #     btn.bind("<Enter>", lambda e: onHoverIn(btn))
 #     btn.bind("<Leave>", lambda e: onHoverOut(btn))
+
+data = {   '192.168.1.0/24': {   '192.168.1.10': {   'OSfamily': 'Linux',
+                                              'OSgen': '2.6.X',
+                                              'OSname': 'Linux 2.6.32',
+                                              'VMname': [   {   'name': '',
+                                                                'type': ''}],
+                                              'hostname': '',
+                                              'protocol': {   'tcp': {   22: 'open',
+                                                                         3306: 'open'}},
+                                              'state': 'up',
+                                              'type': 'general purpose',
+                                              'vendor': 'Linux'},
+                          '192.168.1.182': {   'OSfamily': 'Android',
+                                               'OSgen': '12.X',
+                                               'OSname': 'Android 10 - 12 '
+                                                         '(Linux 4.14 - 4.19)',
+                                               'VMname': [   {   'name': 'Bbox-TV-001.lan',
+                                                                 'type': 'PTR'}],
+                                               'hostname': 'Bbox-TV-001.lan',
+                                               'protocol': {   'tcp': {   8008: 'open',
+                                                                          8009: 'open',
+                                                                          8443: 'open',
+                                                                          9000: 'open'}},
+                                               'state': 'up',
+                                               'type': 'phone',
+                                               'vendor': 'Google'},
+                          '192.168.1.2': {   'OSfamily': 'Linux',
+                                             'OSgen': '2.6.X',
+                                             'OSname': 'Linux 2.6.32',
+                                             'VMname': [   {   'name': '',
+                                                               'type': ''}],
+                                             'hostname': '',
+                                             'protocol': {   'tcp': {   22: 'open',
+                                                                        80: 'open'}},
+                                             'state': 'up',
+                                             'type': 'general purpose',
+                                             'vendor': 'Linux'},
+                          '192.168.1.250': {   'OSfamily': 'Linux',
+                                               'OSgen': '2.6.X',
+                                               'OSname': 'Linux 2.6.32',
+                                               'VMname': [   {   'name': '',
+                                                                 'type': ''}],
+                                               'hostname': '',
+                                               'protocol': {   'tcp': {   22: 'open',
+                                                                          111: 'open',
+                                                                          3128: 'open'}},
+                                               'state': 'up',
+                                               'type': 'general purpose',
+                                               'vendor': 'Linux'},
+                          '192.168.1.251': {   'OSfamily': 'Linux',
+                                               'OSgen': '2.6.X',
+                                               'OSname': 'Linux 2.6.32',
+                                               'VMname': [   {   'name': '',
+                                                                 'type': ''}],
+                                               'hostname': '',
+                                               'protocol': {   'tcp': {   22: 'open'}},
+                                               'state': 'up',
+                                               'type': 'general purpose',
+                                               'vendor': 'Linux'},
+                          '192.168.1.254': {   'OSfamily': 'Linux',
+                                               'OSgen': '5.X',
+                                               'OSname': 'Linux 5.4',
+                                               'VMname': [   {   'name': 'bbox.lan',
+                                                                 'type': 'PTR'}],
+                                               'hostname': 'bbox.lan',
+                                               'protocol': {   'tcp': {   53: 'open',
+                                                                          80: 'open',
+                                                                          443: 'open',
+                                                                          5060: 'filtered',
+                                                                          5061: 'filtered',
+                                                                          49152: 'open'}},
+                                               'state': 'up',
+                                               'type': 'general purpose',
+                                               'vendor': 'Linux'},
+                          '192.168.1.3': {   'OSfamily': 'Linux',
+                                             'OSgen': '2.6.X',
+                                             'OSname': 'Linux 2.6.32',
+                                             'VMname': [   {   'name': '',
+                                                               'type': ''}],
+                                             'hostname': '',
+                                             'protocol': {   'tcp': {   22: 'open',
+                                                                        80: 'open'}},
+                                             'state': 'up',
+                                             'type': 'general purpose',
+                                             'vendor': 'Linux'},
+                          '192.168.1.68': {   'OSfamily': 'Windows',
+                                              'OSgen': '11',
+                                              'OSname': 'Microsoft Windows 10 '
+                                                        '1607 - 11 23H2',
+                                              'VMname': [   {   'name': '',
+                                                                'type': ''}],
+                                              'hostname': '',
+                                              'protocol': {   'tcp': {   135: 'open',
+                                                                         139: 'open',
+                                                                         445: 'open',
+                                                                         902: 'open',
+                                                                         912: 'open',
+                                                                         2008: 'open',
+                                                                         2179: 'open',
+                                                                         2869: 'open',
+                                                                         5357: 'open',
+                                                                         5800: 'open',
+                                                                         5900: 'open',
+                                                                         7070: 'open'}},
+                                              'state': 'up',
+                                              'type': 'general purpose',
+                                              'vendor': 'Microsoft'},
+                          '192.168.1.74': {   'OSfamily': 'Linux',
+                                              'OSgen': '5.X',
+                                              'OSname': 'Linux 4.15 - 5.19',
+                                              'VMname': [   {   'name': 'truenas.lan',
+                                                                'type': 'PTR'}],
+                                              'hostname': 'truenas.lan',
+                                              'protocol': {   'tcp': {   80: 'open',
+                                                                         111: 'open',
+                                                                         443: 'open',
+                                                                         5357: 'open'}},
+                                              'state': 'up',
+                                              'type': 'general purpose',
+                                              'vendor': 'Linux'},
+                          '192.168.1.78': {   'OSfamily': 'IOS',
+                                              'OSgen': '12.X',
+                                              'OSname': 'Cisco 1812, 3640, or '
+                                                        '3700 router (IOS '
+                                                        '12.4)',
+                                              'VMname': [   {   'name': '',
+                                                                'type': ''}],
+                                              'hostname': '',
+                                              'protocol': {},
+                                              'state': 'up',
+                                              'type': 'router',
+                                              'vendor': 'Cisco'},
+                          '192.168.1.83': {   'OSfamily': 'Linux',
+                                              'OSgen': '5.X',
+                                              'OSname': 'Linux 4.15 - 5.19',
+                                              'VMname': [   {   'name': 'GitLab.lan',
+                                                                'type': 'PTR'}],
+                                              'hostname': 'GitLab.lan',
+                                              'protocol': {   'tcp': {   22: 'open',
+                                                                         25: 'open',
+                                                                         80: 'open'}},
+                                              'state': 'up',
+                                              'type': 'general purpose',
+                                              'vendor': 'Linux'},
+                          '192.168.1.99': {}}}
+# drawResult(data, row)
+
 
 # ---------- loop ----------
 
