@@ -71,8 +71,14 @@ def sendToServer(file, url):
     with open(file, "r"):
         logger_main.debug(f"File: {file}")
         data = json.load(file)
-    response: requests.Response = requests.post(url=url, json=file)#, data=data)
+        # pprint.pprint(data)
+    response: requests.Response = requests.post(url=url, json=file, data=data)
     logger_main.debug(f"Réponse du serveur: {response.status_code} - {response.text}")
+
+def sendJson() -> None:
+    global JSON_FILE
+    global URL
+    sendToServer(JSON_FILE, URL)
 
 def scanToJson(data: dict):
     with open(JSON_FILE, "w") as f:
@@ -142,9 +148,9 @@ def checkTargetNet(void = None) -> bool:
                 logger_main.error(f"Erreur: {e}")
                 labelResult.configure(text="❌ Erreur", bg_color="red")
                 targetNetBtn.configure(state="normal")
-                targetHostBtn.configure(state="normal")
+                # targetHostBtn.configure(state="normal")
                 targetNetEntry.configure(state="normal")
-                targetHostEntry.configure(state="normal")
+                # targetHostEntry.configure(state="normal")
 
         check_result()  # Lance la vérification immédiate
         # labelResult.configure(text="", bg_color="transparent")
@@ -201,17 +207,17 @@ def drawResult(data: dict, row: int = 0) -> None:
                     label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
                     row += 1
 
-def checkTargetHost(void = None) -> bool:
-    HOSTNAME_REGEX = r"^[a-zA-Z0-9.-]+$"
+# def checkTargetHost(void = None) -> bool:
+#     HOSTNAME_REGEX = r"^[a-zA-Z0-9.-]+$"
 
-    targetHostInput: str = targetHostEntry.get().strip()
+#     targetHostInput: str = targetHostEntry.get().strip()
     
-    if re.match(HOSTNAME_REGEX, targetHostInput):
-        labelResult.configure(text="Lancement du scan", bg_color="green")
-        targetHostEntry.configure(border_color="gray")
-    else:
-        targetHostEntry.configure(border_color="red")
-        labelResult.configure(text="❌ Nom d'hôte invalide", bg_color="red")
+#     if re.match(HOSTNAME_REGEX, targetHostInput):
+#         labelResult.configure(text="Lancement du scan", bg_color="green")
+#         # targetHostEntry.configure(border_color="gray")
+#     else:
+#         targetHostEntry.configure(border_color="red")
+#         labelResult.configure(text="❌ Nom d'hôte invalide", bg_color="red")
 
 def onClick(btn: ctk.CTkButton):
     pass
@@ -336,6 +342,13 @@ targetNetBtn.bind("<Leave>", lambda e: onHoverOut(targetNetBtn))
 # targetHostBtn.grid(row=1, column=2, columnspan=2, pady=10, padx=5)
 # targetHostBtn.bind("<Enter>", lambda e: onHoverIn(targetHostBtn))
 # targetHostBtn.bind("<Leave>", lambda e: onHoverOut(targetHostBtn))
+
+row += 1
+
+sendJsonNetBtn = ctk.CTkButton(scroll_frame, text="Envoyer le json", command=sendJson)
+sendJsonNetBtn.grid(row=row, column=0, columnspan=2, pady=10, padx=5)
+sendJsonNetBtn.bind("<Enter>", lambda e: onHoverIn(sendJsonNetBtn))
+sendJsonNetBtn.bind("<Leave>", lambda e: onHoverOut(sendJsonNetBtn))
 
 row += 1
 
