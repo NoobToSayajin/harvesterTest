@@ -1,0 +1,31 @@
+FROM debian:12
+
+# Installer les dépendances nécessaires
+RUN apt update && apt install -y \
+    git python3.13 python3.13-venv python3.13-distutils x11vnc xvfb fluxbox novnc websockify \
+    && rm -rf /var/lib/apt/lists/*
+
+# Créer un dossier pour l'application
+WORKDIR /app
+
+# Script de mise à jour et démarrage
+RUN echo '#!/bin/bash\n\
+cd /app\n\
+if [ ! -d ".git" ]; then\n\
+  git clone $GIT_REPO .\n\
+else\n\
+  git pull\n\
+fi\n\
+python3.13 -m venv venv\n\
+source venv/bin/activate\n\
+pip install --no-cache-dir -r requirements.txt\n\
+x11vnc -display :0 -nopw -forever &\n\
+Xvfb :0 -screen 0 1920x1080x16 &\n\
+fluxbox &\n\
+websockify --web /usr/share/novnc/ 5901 localhost:5900 &\n\
+python3.13 app.py' > /start.sh
+
+RUN chmod +x /start.sh
+
+# Exécuter le script au démarrage du conteneur
+CMD ["/bin/bash", "/start.sh"]

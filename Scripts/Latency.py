@@ -1,57 +1,39 @@
-import time
-import logging
-from logging.handlers import TimedRotatingFileHandler
+import subprocess
 
-from scapy.all import IP, ICMP, sr1
-from scapy.packet import Packet
-
-# ---------- log ----------
-logger_main: logging.Logger = logging.getLogger(__name__)
-logger_main.setLevel(logging.DEBUG)
-
-formater = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:ligne_%(lineno)d -> %(message)s')
-
-# file_handler = TimedRotatingFileHandler(
-#     filename="..\\tmp\\.log", # type: ignore
-#     when='H',
-#     interval=24,
-#     backupCount=5,
-#     encoding='utf-8'
-# )
-
-# file_handler.setFormatter(formater)
-# file_handler.setLevel(logging.DEBUG)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formater)
-
-# logger_main.addHandler(file_handler)
-logger_main.addHandler(stream_handler)
-
-# ---------- ping ----------
 class Latency:
-    def __init__(self, host: str, count: int = 5, timeout: int = 1, gap: int = 10):
-        self.__host: str = host
-        self.__count: int = count
-        self.__timeout: int = timeout
-        self.__gap: int = gap
-    
-    def ping(self) -> list[float]:
-        latency = []
-        for i in range(self.__count):
-            packet = IP(dst=self.__host)/ICMP()
-            t0: float = time.time()
-            echoReply: Packet | None = sr1(packet, self.__timeout, verbose=False)
-            latency.append((time.time()-t0)) # en secondes
-        
-        return (sum(latency)/len(latency))*1000 # en millisecondes
-    
-if __name__=="__main__":
-    # pck = IP(dst="8.8.8.8")/ICMP()
-    # t0 = time.time()
-    # reply = sr1(pck, timeout=5, verbose=False)
-    # print(f"{(time.time()-t0):.5f}")
-    # print(reply)
-    p = Latency("8.8.8.8")
-    p.ping()
-    print(p.ping())
+    def __init__(self, host: str, timeout: int = 1):
+        """
+        Initialise la classe Latency.
+        :param host: L'hôte à pinger (par exemple, "google.com" ou "192.168.1.1").
+        :param timeout: Le temps d'attente maximal pour une réponse (en secondes).
+        """
+        self.__host = host
+        self.__timeout = timeout
+
+    def ping(self) -> float:
+        """
+        Envoie un ping à l'hôte et retourne la latence en millisecondes.
+        Retourne -1 si le ping échoue.
+        """
+        try:
+            # Utiliser la commande système ping
+            output = subprocess.run(
+                ["ping", "-c", "1", "-W", str(self.__timeout), self.__host],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+
+            # Vérifier si le ping a réussi
+            if output.returncode == 0:
+                # Extraire le temps de réponse du ping
+                time_line = [line for line in output.stdout.splitlines() if "time=" in line][0]
+                latency = float(time_line.split("time=")[1].split(" ms")[0])
+                return latency
+            else:
+                # Retourner -1 si le ping échoue
+                return -1
+        except Exception as e:
+            # En cas d'erreur, afficher un message et retourner -1
+            print(f"Erreur lors de l'exécution de ping: {e}")
+            return -1
