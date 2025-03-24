@@ -1,9 +1,32 @@
 FROM debian:12
 
-# Installer les dépendances nécessaires
+# Mettre à jour les sources et installer les dépendances pour compiler Python
+RUN apt update --allow-releaseinfo-change && apt install -y \
+    git build-essential zlib1g-dev libssl-dev libncurses5-dev libgdbm-dev \
+    libnss3-dev libreadline-dev libffi-dev curl libsqlite3-dev libbz2-dev
+
+# Supprimer les fichiers inutiles après l'installation
+RUN rm -rf /var/lib/apt/lists/*
+
+# Télécharger et compiler Python 3.13
+WORKDIR /usr/src
+RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
+    tar -xf Python-3.13.0.tgz && \
+    cd Python-3.13.0 && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && \
+    rm -rf /usr/src/Python-3.13.0*
+
+# Vérifier l'installation de Python
+RUN python3.13 --version
+
+# Installer les dépendances pour l'affichage distant
 RUN apt update && apt install -y \
-    git python3.13 python3.13-venv python3.13-distutils x11vnc xvfb fluxbox novnc websockify \
-    && rm -rf /var/lib/apt/lists/*
+    x11vnc xvfb fluxbox novnc websockify
+
+# Nettoyage final
+RUN rm -rf /var/lib/apt/lists/*
 
 # Créer un dossier pour l'application
 WORKDIR /app
@@ -19,9 +42,9 @@ fi\n\
 python3.13 -m venv .venv\n\
 source .venv/bin/activate\n\
 pip install --no-cache-dir -r requirements\n\
-x11vnc -display :0 -nopw -forever &\n\
 Xvfb :0 -screen 0 1920x1080x16 &\n\
 fluxbox &\n\
+x11vnc -display :0 -nopw -forever &\n\
 websockify --web /usr/share/novnc/ 5901 localhost:5900 &\n\
 python3.13 app.py' > /start.sh
 
