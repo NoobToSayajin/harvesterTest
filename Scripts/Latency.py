@@ -1,4 +1,9 @@
+# Python included libraries
 import subprocess
+
+# PIP libraries
+
+# Custom libraries
 
 class Latency:
     def __init__(self, host: str, timeout: int = 1):

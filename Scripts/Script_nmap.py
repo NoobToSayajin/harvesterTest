@@ -1,7 +1,12 @@
+# Python included libraries
 import logging
 from logging.handlers import TimedRotatingFileHandler
-import nmap
 from pprint import pprint
+
+# PIP libraries
+import nmap
+
+# Custom libraries
 from Debug.Log import Timer
 
 # ---------- log ----------

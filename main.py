@@ -1,18 +1,23 @@
+# Python included libraries
 import re
 import logging
 import json
-import requests
 import os
 import queue
 import threading
 from logging.handlers import TimedRotatingFileHandler
 import pprint
+import datetime
+
+# PIP libraries
+import requests
 import customtkinter as ctk
 from PIL import ImageFont
+
+# Custom libraries
 import Scripts.Script_nmap
 import Scripts.Latency
 import Debug.Log
-import datetime
 
 # -------------------- log --------------------
 

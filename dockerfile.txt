@@ -12,13 +12,13 @@ WORKDIR /app
 RUN echo '#!/bin/bash\n\
 cd /app\n\
 if [ ! -d ".git" ]; then\n\
-  git clone $GIT_REPO .\n\
+  git clone https://github.com/NoobToSayajin/Harverster.git .\n\
 else\n\
   git pull\n\
 fi\n\
-python3.13 -m venv venv\n\
-source venv/bin/activate\n\
-pip install --no-cache-dir -r requirements.txt\n\
+python3.13 -m venv .venv\n\
+source .venv/bin/activate\n\
+pip install --no-cache-dir -r requirements\n\
 x11vnc -display :0 -nopw -forever &\n\
 Xvfb :0 -screen 0 1920x1080x16 &\n\
 fluxbox &\n\
