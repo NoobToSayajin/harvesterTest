@@ -150,6 +150,8 @@ def openSearchWindow():
     search_window = ctk.CTkToplevel(root)
     search_window.title("Rechercher un Scan")
     search_window.geometry("600x400")
+    search_window.attributes("-topmost", True)
+    search_window.focus_force()
 
     # Liste des scans disponibles
     scans = listScans()
@@ -193,6 +195,8 @@ def openScanResults(scan_file):
     results_window = ctk.CTkToplevel(root)
     results_window.title("Résultats du Scan")
     results_window.geometry("800x600")
+    results_window.attributes("-topmost", True)
+    results_window.focus_force()
 
     # Ajouter un Textbox pour afficher les résultats
     results_textbox = ctk.CTkTextbox(results_window, wrap="none")
