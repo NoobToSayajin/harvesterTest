@@ -1,9 +1,9 @@
 FROM debian:12
 
 # Mettre à jour les sources et installer les dépendances pour compiler Python
-RUN apt update --allow-releaseinfo-change && apt install -y \
-    git build-essential zlib1g-dev libssl-dev libncurses5-dev libgdbm-dev \
-    libnss3-dev libreadline-dev libffi-dev curl libsqlite3-dev libbz2-dev
+RUN apt update --allow-releaseinfo-change && \
+    apt install -y git build-essential zlib1g-dev libssl-dev libncurses5-dev libgdbm-dev \
+    libnss3-dev libreadline-dev libffi-dev curl libsqlite3-dev libbz2-dev iputils-ping
 
 # Supprimer les fichiers inutiles après l'installation
 RUN rm -rf /var/lib/apt/lists/*
