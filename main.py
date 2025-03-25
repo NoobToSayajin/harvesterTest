@@ -348,7 +348,8 @@ color1: str = "#191bdf"  # bleu
 color2: str = "#09080d"  # noir
 color3: str = "#fe6807"  # orange
 
-root.geometry("1000x600")
+root.geometry(f"{screen_width}x{screen_height}")
+root.attributes("-fullscreen", True)
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("Ressources/Themes/orange.json")
 
