@@ -5,7 +5,7 @@ RUN apt update && \
     apt install -y git build-essential zlib1g-dev libssl-dev libncurses5-dev libgdbm-dev \
     libnss3-dev libreadline-dev libffi-dev curl libsqlite3-dev libbz2-dev \
     tcl-dev tk-dev libtcl8.6 libtk8.6 \
-    iputils-ping x11vnc x11-xserver-utils xvfb fluxbox novnc websockify && \
+    iputils-ping x11vnc x11-xserver-utils xvfb fluxbox novnc websockify nmap && \
     rm -rf /var/lib/apt/lists/*
 
 # Télécharger et compiler Python 3.13 avec le support Tcl/Tk

@@ -32,7 +32,7 @@ logger_main.addHandler(stream_handler)
 
 # -------------------- App --------------------
 
-URL: str = "http://192.168.40.131:5000/api/data"  # URL du serveur Nester
+URL: str = "http://10.3.0.10:5000/api/data"  # URL du serveur Nester
 resultQueue = queue.Queue()
 HOST: str = "google.com"
 latency = Scripts.Latency.Latency(HOST)
