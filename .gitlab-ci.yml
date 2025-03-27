@@ -1,0 +1,11 @@
+stages:
+  - build
+
+build_image:
+  stage: build
+  script:
+    - docker build -t harvester:$CI_COMMIT_TAG .
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker push harvester:$CI_COMMIT_TAG
+  only:
+    - main
