@@ -55,7 +55,7 @@ python3.13 main.py' > /start.sh
 RUN chmod +x /start.sh
 
 # Exposer les ports nécessaires
-EXPOSE 5900 5901
+EXPOSE 5901
 
 # Exécuter le script au démarrage du conteneur
 CMD ["/bin/bash", "/start.sh"]
