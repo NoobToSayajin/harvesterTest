@@ -11,7 +11,7 @@ before_script:
 build_image:
   stage: build
   script:
-    - docker build -t harvester:$IMAGE_TAG .
-    - docker push harvester:$IMAGE_TAG
+    - docker build -t 192.168.1.83:5005/root/harvester:$IMAGE_TAG .
+    - docker push 192.168.1.83:5005/root/harvester:$IMAGE_TAG
   only:
     - main

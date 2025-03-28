@@ -20,17 +20,12 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
     rm -rf Python-3.13.0*
 
 # Créer un dossier pour l'application
-WORKDIR /app
 
 # Script de mise à jour et démarrage
+RUN git clone http://192.168.1.83/root/harvester.git /app
+
+WORKDIR /app
 RUN echo '#!/bin/bash\n\
-cd /app\n\
-if [ ! -d ".git" ]; then\n\
-  # git clone https://github.com/NoobToSayajin/Harverster.git .\n\
-  git clone http://192.168.1.83/root/harvester.git .\n\
-else\n\
-  git pull\n\
-fi\n\
 python3.13 -m venv .venv\n\
 source .venv/bin/activate\n\
 if [ -f requirements ]; then\n\
