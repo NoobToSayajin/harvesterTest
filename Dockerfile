@@ -33,7 +33,7 @@ if [ -f requirements ]; then\n\
 else\n\
   echo "Fichier requirements manquant"\n\
 fi\n\
-echo "$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)" > VERSION\n\
+echo "$(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)" > VERSION\n\
 echo "Starting Xvfb..."\n\
 Xvfb :99 -screen 0 1920x1080x16 &\n\
 export DISPLAY=:99\n\
