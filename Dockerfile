@@ -26,7 +26,8 @@ WORKDIR /app
 RUN echo '#!/bin/bash\n\
 cd /app\n\
 if [ ! -d ".git" ]; then\n\
-  git clone https://github.com/NoobToSayajin/Harverster.git .\n\
+  # git clone https://github.com/NoobToSayajin/Harverster.git .\n\
+  git clone http://192.168.1.83/root/harvester.git .\n\
 else\n\
   git pull\n\
 fi\n\
@@ -37,6 +38,7 @@ if [ -f requirements ]; then\n\
 else\n\
   echo "Fichier requirements manquant"\n\
 fi\n\
+echo "$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)" > VERSION\n\
 echo "Starting Xvfb..."\n\
 Xvfb :99 -screen 0 1920x1080x16 &\n\
 export DISPLAY=:99\n\

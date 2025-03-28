@@ -1,11 +1,17 @@
 stages:
   - build
+  - deploy
+
+variables:
+  IMAGE_TAG: "$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)"
+
+before_script:
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 build_image:
   stage: build
   script:
-    - docker build -t harvester:$CI_COMMIT_TAG .
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker push harvester:$CI_COMMIT_TAG
+    - docker build -t harvester:$IMAGE_TAG .
+    - docker push harvester:$IMAGE_TAG
   only:
     - main
