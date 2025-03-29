@@ -26,6 +26,8 @@ RUN git clone  https://github.com/NoobToSayajin/Harverster.git /app
 WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
+git fetch \n\
+git pull\n\
 python3.13 -m venv .venv\n\
 source .venv/bin/activate\n\
 if [ -f requirements ]; then\n\
