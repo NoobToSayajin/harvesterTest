@@ -486,6 +486,7 @@ labelResult.grid(row=row, columnspan=4)
 row += 1
 
 root.after(1000, getLatency)
+root.after(1000, getLatencyGoogle)
 
 # -------------------- loop --------------------
 
