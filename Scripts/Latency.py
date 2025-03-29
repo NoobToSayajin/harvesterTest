@@ -1,11 +1,24 @@
 # Python included libraries
 import subprocess
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 # PIP libraries
 
 # Custom libraries
+from Debug.Log import Timer
 
 class Latency:
+    # ---------- log ----------
+    logger_latency: logging.Logger = logging.getLogger(__name__)
+    logger_latency.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:ligne_%(lineno)d -> %(message)s')
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    logger_latency.addHandler(stream_handler)
+    
     def __init__(self, host: str, timeout: int = 1):
         """
         Initialise la classe Latency.
@@ -40,5 +53,5 @@ class Latency:
                 return -1
         except Exception as e:
             # En cas d'erreur, afficher un message et retourner -1
-            print(f"Erreur lors de l'exécution de ping: {e}")
+            Latency.logger_latency.error(f"Erreur lors de l'exécution de ping: {e}")
             return -1

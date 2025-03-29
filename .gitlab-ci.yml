@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-  IMAGE_TAG: "$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)"
+  IMAGE_TAG: "$(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
 
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY

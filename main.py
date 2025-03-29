@@ -32,10 +32,11 @@ logger_main.addHandler(stream_handler)
 
 # -------------------- App --------------------
 
-URL: str = "http://10.3.0.10:5000/api/data"  # URL du serveur Nester
+URL: str = "http://172.16.3.253:5000/api/data"  # URL du serveur Nester
 resultQueue = queue.Queue()
-HOST: str = "google.com"
+HOST: str = "172.16.3.254" # Router Simulant Internet
 latency = Scripts.Latency.Latency(HOST)
+latencyGoogle = Scripts.Latency.Latency("google.com")
 
 def getVersion() -> str:
     """Récupère la version de l'application depuis le fichier VERSION."""
@@ -48,10 +49,21 @@ def getLatency() -> float:
     global labelLatency
     ping_result = latency.ping()
     if ping_result != -1:
-        labelLatency.configure(text=f"Latence {HOST:>15}: {ping_result:9.4f} ms")
+        labelLatency.configure(text=f"Latence vers Datacenter {HOST:>15}: {ping_result:9.3f} ms")
     else:
-        labelLatency.configure(text=f"Latence {HOST:>15}:   Erreur")
+        labelLatency.configure(text=f"Latence vers Datacenter {HOST:>15}:   Erreur")
     root.after(1000, getLatency)  # Mettre à jour la latence toutes les secondes
+
+def getLatencyGoogle() -> float:
+    """Met à jour la latence affichée dans l'interface graphique."""
+    global latencyGoogle
+    global labelLatencyGoogle
+    ping_result = latency.ping()
+    if ping_result != -1:
+        labelLatencyGoogle.configure(text=f"Latence www.google.com: {ping_result:9.3f} ms")
+    else:
+        labelLatencyGoogle.configure(text=f"Latence www.google.com:   Erreur")
+    root.after(1000, getLatencyGoogle)  # Mettre à jour la latence toutes les secondes
 
 def startScan(targets: list[str]) -> dict[str, dict]:
     """Lance un scan réseau et retourne les résultats."""
@@ -64,7 +76,7 @@ def startScan(targets: list[str]) -> dict[str, dict]:
         target_ip = targets[0] if targets else "N/A"
 
         # Calculer le nombre réel d'appareils connectés
-        connected_devices = len(result)  # Nombre d'adresses IP uniques dans les résultats
+        connected_devices = len(result['data'][next(iter(result['data']))])  # Nombre d'adresses IP uniques dans les résultats
 
         # Mesurer la latence pour l'hôte principal
         latency_value = latency.ping()  # Utilisez la classe Latency pour mesurer la latence
@@ -255,7 +267,7 @@ def checkTargetNet(void=None) -> bool:
             try:
                 resultat, timer = resultQueue.get_nowait()
                 logger_main.debug(f"Résultat du scan : {pprint.pformat(resultat)}")
-                labelResult.configure(text=f"Scan terminé en: {timer}", bg_color=color1)
+                labelResult.configure(text=f"Scan terminé", bg_color=color1)
                 targetNetBtn.configure(state="normal")
                 targetNetEntry.configure(state="normal")
                 drawResult(resultat, row)
@@ -274,7 +286,7 @@ def checkTargetNet(void=None) -> bool:
 
 def drawResult(data: dict, row: int = 0) -> None:
     """Affiche les résultats du scan dans l'interface graphique."""
-    logger_main.debug(f"Données reçues : {data}")
+    logger_main.debug(f"Données reçues : {type(data)} {data}")
 
     # Vérifier que les données sont un dictionnaire
     if not isinstance(data, dict):
@@ -293,45 +305,53 @@ def drawResult(data: dict, row: int = 0) -> None:
         devices_label.grid(row=row, column=0, sticky="w", padx=10, pady=5)
         row += 1
 
-    if "latency" in data:
-        latency_label = ctk.CTkLabel(scroll_frame, text=f"Latence: {data['latency']:.2f} ms", font=("Arial", 12, "bold"))
-        latency_label.grid(row=row, column=0, sticky="w", padx=10, pady=5)
-        row += 1
-
     # Parcourir chaque adresse IP dans les résultats
-    for ip, info in data.items():
-        if ip in ["franchise_id", "ip_address", "connected_devices", "latency", "scan_data"]:
-            continue  # Ignorer les champs supplémentaires
-
-        # Créer un cadre pour chaque adresse IP
-        ip_frame = ctk.CTkFrame(scroll_frame, fg_color=color2)
-        ip_frame.grid(row=row, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
-        row += 1
-
-        # Afficher l'adresse IP
-        ip_label = ctk.CTkLabel(ip_frame, text=f"IP: {ip}", font=("Arial", 12, "bold"))
-        ip_label.grid(row=0, column=0, sticky="w", padx=10, pady=5)
-
-        # Afficher les informations spécifiques de l'IP
-        if isinstance(info, dict):
-            info_row = 1
-            for key, value in info.items():
-                if key == "protocol" and isinstance(value, dict):
-                    # Afficher les ports ouverts
-                    if 'tcp' in value:
-                        tcp_label = ctk.CTkLabel(ip_frame, text="Ports ouverts (TCP):", font=("Arial", 11, "bold"))
-                        tcp_label.grid(row=info_row, column=0, sticky="w", padx=10, pady=5)
-                        info_row += 1
-
-                        for port, status in value['tcp'].items():
-                            port_label = ctk.CTkLabel(ip_frame, text=f"  Port {port}: {status}", font=("Arial", 11))
-                            port_label.grid(row=info_row, column=0, sticky="w", padx=20, pady=0)
-                            info_row += 1
-                else:
-                    # Afficher les autres informations
-                    info_label = ctk.CTkLabel(ip_frame, text=f"{key}: {value}", font=("Arial", 11))
-                    info_label.grid(row=info_row, column=0, sticky="w", padx=10, pady=0)
-                    info_row += 1
+    for name, detail in data['data'].items():
+            hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color1, fg_color=color1)
+            hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+            row += 1
+            label = ctk.CTkLabel(scroll_frame, text=f"Résultat du scan du réseau ou de l'hôte: {name:>15}")
+            label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+            row += 1
+            for ip, info in detail.items():
+                hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color3, fg_color=color3)
+                hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+                row += 1
+                label = ctk.CTkLabel(scroll_frame, text=f"\tIP: {ip}")
+                label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=5)
+                row += 1
+                lat = Scripts.Latency.Latency(ip)
+                ping_result = lat.ping()
+                logger_main.debug(f"Latence pour {ip}: {lat.ping()}")
+                label = ctk.CTkLabel(scroll_frame, text=f"\tLatence: {ip:>15}:{ping_result:9.3f} ms")
+                label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=5)
+                row += 1
+                del lat
+                for key, value in info.items():
+                    if isinstance(value, dict):
+                        label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:")
+                        label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                        row += 1
+                        for k, v in value.items():
+                            if isinstance(v, dict):
+                                label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t{k}:")
+                                label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                row += 1
+                                for i, j in v.items():
+                                    print(f"{name:>15}: {key} -> {k} -> {i} -> {j}")
+                                    label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t\t{i}: {j}")
+                                    label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                    row += 1
+                            else:
+                                print(f"{name:>15}: {key} -> {k} -> {v}")
+                                label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key} -> {k} -> {v}")
+                                label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                row += 1
+                    else:
+                        print(f"{name:>15}: {key} -> {value}")
+                        label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:\t {value}")
+                        label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                        row += 1
 
 def onHoverIn(btn: ctk.CTkButton) -> None:
     """Change la couleur du bouton lorsque la souris survole."""
@@ -449,8 +469,13 @@ targetNetBtn.bind("<Leave>", lambda e: onHoverOut(targetNetBtn))
 row += 1
 
 # Afficher la latence
-labelLatency = ctk.CTkLabel(scroll_frame, text=f"Latence {HOST:>15}: ms")
+labelLatency = ctk.CTkLabel(scroll_frame, text=f"Latence vers Datacenter {HOST:>15}: ms")
 labelLatency.grid(row=row, columnspan=4, pady=10, padx=5, sticky="w")
+
+row += 1
+
+labelLatencyGoogle = ctk.CTkLabel(scroll_frame, text=f"Latence www.google.com: ms")
+labelLatencyGoogle.grid(row=row, columnspan=4, pady=10, padx=5, sticky="w")
 
 row += 1
 

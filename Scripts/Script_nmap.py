@@ -9,18 +9,17 @@ import nmap
 # Custom libraries
 from Debug.Log import Timer
 
-# ---------- log ----------
-logger_script_nmap: logging.Logger = logging.getLogger(__name__)
-logger_script_nmap.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:ligne_%(lineno)d -> %(message)s')
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-logger_script_nmap.addHandler(stream_handler)
-
-# ---------- scan ----------
 class Scan:
+    # ---------- log ----------
+    logger_script_nmap: logging.Logger = logging.getLogger(__name__)
+    logger_script_nmap.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:ligne_%(lineno)d -> %(message)s')
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    logger_script_nmap.addHandler(stream_handler)
+    
     def __init__(self, targets: list[str]) -> None:
         self.__targets: list[str] = targets
         self.__scanner: nmap.PortScanner = nmap.PortScanner()
@@ -39,17 +38,17 @@ class Scan:
 
     @options.setter
     def options(self, options: str) -> None:
-        logger_script_nmap.debug(f"New options: {options}")
+        Scan.logger_script_nmap.debug(f"New options: {options}")
         self.__options = options
 
     @Timer
     def scan(self) -> dict[str, dict]:
         results = {"status": "success", "data": {}}
-        logger_script_nmap.debug(f"New scan request: {self.__targets}")
+        Scan.logger_script_nmap.debug(f"New scan request: {self.__targets}")
 
         try:
             for target in self.__targets:
-                logger_script_nmap.debug(f"Scan Host or network: {target}")
+                Scan.logger_script_nmap.debug(f"Scan Host or network: {target}")
                 self.__scanner.scan(target, arguments=self.__options)
                 results["data"][target] = {}
 
@@ -84,11 +83,11 @@ class Scan:
                         results["data"][target][host]["smb_info"] = host_info["script"]["smb-os-discovery"]
 
         except nmap.PortScannerError as e:
-            logger_script_nmap.error(f"NMAP error: {e}")
+            Scan.logger_script_nmap.error(f"NMAP error: {e}")
             results["status"] = "error"
             results["message"] = str(e)
         except Exception as e:
-            logger_script_nmap.error(f"Unexpected error: {e}")
+            Scan.logger_script_nmap.error(f"Unexpected error: {e}")
             results["status"] = "error"
             results["message"] = str(e)
 
