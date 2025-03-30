@@ -32,9 +32,10 @@ logger_main.addHandler(stream_handler)
 
 # -------------------- App --------------------
 
-URL: str = "http://172.16.3.253:5000/api/data"  # URL du serveur Nester
+URL: str = "http://172.16.2.253:5000/api/data"  # URL du serveur Nester
 resultQueue = queue.Queue()
 HOST: str = "172.16.3.254" # Router Simulant Internet
+HOST2: str = "www.google.com"
 latency = Scripts.Latency.Latency(HOST)
 latencyGoogle = Scripts.Latency.Latency("google.com")
 
@@ -60,9 +61,9 @@ def getLatencyGoogle() -> float:
     global labelLatencyGoogle
     ping_result = latency.ping()
     if ping_result != -1:
-        labelLatencyGoogle.configure(text=f"Latence www.google.com: {ping_result:9.3f} ms")
+        labelLatencyGoogle.configure(text=f"Latence {HOST2}: {ping_result:9.3f} ms")
     else:
-        labelLatencyGoogle.configure(text=f"Latence www.google.com:   Erreur")
+        labelLatencyGoogle.configure(text=f"Latence {HOST2}:   Erreur")
     root.after(1000, getLatencyGoogle)  # Mettre à jour la latence toutes les secondes
 
 def startScan(targets: list[str]) -> dict[str, dict]:
@@ -474,7 +475,7 @@ labelLatency.grid(row=row, columnspan=4, pady=10, padx=5, sticky="w")
 
 row += 1
 
-labelLatencyGoogle = ctk.CTkLabel(scroll_frame, text=f"Latence www.google.com: ms")
+labelLatencyGoogle = ctk.CTkLabel(scroll_frame, text=f"Latence {HOST2}: ms")
 labelLatencyGoogle.grid(row=row, columnspan=4, pady=10, padx=5, sticky="w")
 
 row += 1
