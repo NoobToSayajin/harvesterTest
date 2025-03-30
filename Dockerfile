@@ -20,7 +20,7 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
     rm -rf Python-3.13.0*
 
 # Clone du repository contenant le code de l'application dans le dossier /app
-RUN git clone  http://10.2.0.106/mspr/harvester.git /app
+RUN git clone  http://172.16.2.253/mspr/harvester.git /app
     
 WORKDIR /app
 # Script de démarrage
