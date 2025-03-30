@@ -25,7 +25,6 @@ RUN git clone  http://172.16.2.253/mspr/harvester.git /app
 WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
-# fetch et pull du repo pour ne pas avoir a rebuild le conteneur à chaque fois\n\
 git fetch \n\
 git pull\n\
 python3.13 -m venv .venv\n\
