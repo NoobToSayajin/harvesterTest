@@ -5,7 +5,7 @@ RUN apt update && \
     apt install -y git build-essential zlib1g-dev libssl-dev libncurses5-dev libgdbm-dev \
     libnss3-dev libreadline-dev libffi-dev curl libsqlite3-dev libbz2-dev \
     tcl-dev tk-dev libtcl8.6 libtk8.6 \
-    iputils-ping x11vnc x11-xserver-utils xvfb fluxbox novnc websockify nmap && \
+    iputils-ping x11vnc x11-xserver-utils xvfb fluxbox novnc websockify nmap numlockx && \
     rm -rf /var/lib/apt/lists/*
 
 # Télécharger et compiler Python 3.13 avec le support Tcl/Tk
@@ -20,8 +20,7 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
     rm -rf Python-3.13.0*
 
 # Clone du repository contenant le code de l'application dans le dossier /app
-# RUN git clone http://192.168.1.83/root/harvester.git /app
-RUN git clone  https://github.com/NoobToSayajin/Harverster.git /app
+RUN git clone  http://10.2.0.106/mspr/harvester.git /app
     
 WORKDIR /app
 # Script de démarrage
@@ -44,6 +43,8 @@ sleep 10\n\
 echo "Starting Fluxbox..."\n\
 fluxbox &\n\
 sleep 5\n\
+echo "Activating NumLock..."\n\
+numlockx on &\n\sleep 5\n\
 echo "Starting x11vnc..."\n\
 x11vnc -xkb -rfbport 5900 -display :99 -nopw -forever -noxdamage -noxinerama -noxrecord -noxfixes -localhost &\n\
 sleep 5\n\

@@ -34,10 +34,11 @@ logger_main.addHandler(stream_handler)
 
 URL: str = "http://172.16.2.253:5000/api/data"  # URL du serveur Nester
 resultQueue = queue.Queue()
-HOST: str = "172.16.3.254" # Router Simulant Internet
+HOST: str = "172.16.2.254" # Router Simulant Internet
 HOST2: str = "www.google.com"
 latency = Scripts.Latency.Latency(HOST)
 latencyGoogle = Scripts.Latency.Latency("google.com")
+previousLabel: list[ctk.CTkLabel] = []
 
 def getVersion() -> str:
     """Récupère la version de l'application depuis le fichier VERSION."""
@@ -285,9 +286,25 @@ def checkTargetNet(void=None) -> bool:
         targetNetEntry.configure(border_color="red")
         labelResult.configure(text="❌ Adresse invalide", bg_color="red")
 
+def clearResult() -> None:
+    """Efface les résultats précédents du scan."""
+    global previousLabel
+    for label in previousLabel:
+        label.destroy()
+    previousLabel.clear()
+
+    # Effacer le contenu de la zone de texte
+    if txtBoxResult is not None:
+        txtBoxResult.delete("1.0", "end")
+        txtBoxResult.destroy()
+
 def drawResult(data: dict, row: int = 0) -> None:
     """Affiche les résultats du scan dans l'interface graphique."""
     logger_main.debug(f"Données reçues : {type(data)} {data}")
+    
+    clearResult()
+    global previousLabel
+    previousLabel = []
 
     # Vérifier que les données sont un dictionnaire
     if not isinstance(data, dict):
@@ -299,59 +316,71 @@ def drawResult(data: dict, row: int = 0) -> None:
     if "ip_address" in data:
         ip_label = ctk.CTkLabel(scroll_frame, text=f"IP scannée: {data['ip_address']}", font=("Arial", 12, "bold"))
         ip_label.grid(row=row, column=0, sticky="w", padx=10, pady=5)
+        previousLabel.append(ip_label)
         row += 1
 
     if "connected_devices" in data:
         devices_label = ctk.CTkLabel(scroll_frame, text=f"Appareils connectés: {data['connected_devices']}", font=("Arial", 12, "bold"))
         devices_label.grid(row=row, column=0, sticky="w", padx=10, pady=5)
+        previousLabel.append(devices_label)
         row += 1
 
     # Parcourir chaque adresse IP dans les résultats
     for name, detail in data['data'].items():
             hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color1, fg_color=color1)
             hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+            previousLabel.append(hr)
             row += 1
             label = ctk.CTkLabel(scroll_frame, text=f"Résultat du scan du réseau ou de l'hôte: {name:>15}")
             label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+            previousLabel.append(label)
             row += 1
             for ip, info in detail.items():
                 hr = ctk.CTkFrame(scroll_frame, width=400, height=2, bg_color=color3, fg_color=color3)
                 hr.grid(row=row, columnspan=4, sticky="ew", padx=10, pady=0)
+                previousLabel.append(hr)
                 row += 1
                 label = ctk.CTkLabel(scroll_frame, text=f"\tIP: {ip}")
                 label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=5)
+                previousLabel.append(label)
                 row += 1
                 lat = Scripts.Latency.Latency(ip)
                 ping_result = lat.ping()
                 logger_main.debug(f"Latence pour {ip}: {lat.ping()}")
                 label = ctk.CTkLabel(scroll_frame, text=f"\tLatence: {ip:>15}:{ping_result:9.3f} ms")
                 label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=5)
+                previousLabel.append(label)
                 row += 1
                 del lat
                 for key, value in info.items():
                     if isinstance(value, dict):
                         label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:")
                         label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                        previousLabel.append(label)
                         row += 1
                         for k, v in value.items():
                             if isinstance(v, dict):
                                 label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t{k}:")
                                 label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                previousLabel.append(label)
                                 row += 1
                                 for i, j in v.items():
                                     print(f"{name:>15}: {key} -> {k} -> {i} -> {j}")
                                     label = ctk.CTkLabel(scroll_frame, text=f"\t\t\t\t{i}: {j}")
                                     label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                    previousLabel.append(label)
                                     row += 1
                             else:
                                 print(f"{name:>15}: {key} -> {k} -> {v}")
                                 label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key} -> {k} -> {v}")
                                 label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                                previousLabel.append(label)
                                 row += 1
                     else:
                         print(f"{name:>15}: {key} -> {value}")
                         label = ctk.CTkLabel(scroll_frame, text=f"\t\t{key}:\t {value}")
                         label.grid(row=row, columnspan=4, sticky="w", padx=10, pady=0)
+                        previousLabel.append(label)
                         row += 1
 
 def onHoverIn(btn: ctk.CTkButton) -> None:
