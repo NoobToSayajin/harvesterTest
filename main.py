@@ -434,7 +434,7 @@ menu.pack(side="left", fill="y")
 appName = ctk.CTkLabel(menu, width=menuWidth, height=bntY, text="Harvester", text_color=color0, font=monserratBlack, bg_color=color1)
 appName.pack(fill="x")
 
-scanBtn = ctk.CTkButton(menu, width=menuWidth, height=bntY, text="nmap", corner_radius=0)
+scanBtn = ctk.CTkButton(menu, width=menuWidth, height=bntY, text="Scanner d'IP", corner_radius=0)
 scanBtn.pack(fill="x")
 
 scanBtn.bind("<Enter>", lambda e: onHoverIn(scanBtn))
