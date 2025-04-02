@@ -5,37 +5,28 @@ stages:
 
 variables:
   DOCKER_IMAGE_TAG: "$(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+  CI_REGISTRY_IMAGE: "10.2.0.106/mspr/harvester"
+
+before_script:
+  - apt-get update
+  - apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io
 
 build:
   stage: build
   script:
-    - apt-get update
-    - apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    - apt-get update
-    - apt-get install -y docker-ce docker-ce-cli containerd.io
     - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG .
 
 test:
   stage: test
   script:
-    - apt-get update
-    - apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    - apt-get update
-    - apt-get install -y docker-ce docker-ce-cli containerd.io
     - docker run --rm $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG pytest
 
 deploy:
   stage: deploy
   script:
-    - apt-get update
-    - apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    - apt-get update
-    - apt-get install -y docker-ce docker-ce-cli containerd.io
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG
