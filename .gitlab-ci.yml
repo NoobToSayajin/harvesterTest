@@ -6,21 +6,21 @@ stages:
 variables:
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   CI_REGISTRY_IMAGE: "10.2.0.106/mspr/harvester"
-  DOCKER_HOST: "tcp://docker:2375"  # Force la connexion au bon socket Docker
+  DOCKER_HOST: "tcp://docker:2375"  # Force l'utilisation du service Docker
   DOCKER_DRIVER: "overlay2"
 
 before_script:
   - echo "Vérification de la connexion à Docker..."
-  - docker info || exit 1  # Vérifier que Docker fonctionne
+  - docker info || exit 1
 
 build:
   stage: build
-  image: docker:20.10.7
+  image: docker:24.0.2  # Assure-toi que la version est correcte
   services:
-    - name: docker:20.10.7-dind
+    - name: docker:24.0.2-dind  # Version correspondant à l'image Docker
       alias: docker
   variables:
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_CERTDIR: ""  # Désactive TLS pour éviter les erreurs
   script:
     - echo "Connexion au registre GitLab..."
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -30,9 +30,9 @@ build:
 
 test:
   stage: test
-  image: docker:20.10.7
+  image: docker:24.0.2
   services:
-    - name: docker:20.10.7-dind
+    - name: docker:24.0.2-dind
       alias: docker
   variables:
     DOCKER_TLS_CERTDIR: ""
@@ -42,9 +42,9 @@ test:
 
 deploy:
   stage: deploy
-  image: docker:20.10.7
+  image: docker:24.0.2
   services:
-    - name: docker:20.10.7-dind
+    - name: docker:24.0.2-dind
       alias: docker
   variables:
     DOCKER_TLS_CERTDIR: ""
