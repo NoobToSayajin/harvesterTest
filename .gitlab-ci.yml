@@ -4,29 +4,41 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE_TAG: "$(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+  DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   CI_REGISTRY_IMAGE: "10.2.0.106/mspr/harvester"
 
 before_script:
-  - apt-get update
-  - apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  - apt-get update
-  - apt-get install -y docker-ce docker-ce-cli containerd.io
+  - echo "Activation de Docker"
+  - docker info  # Vérifier que Docker est accessible
 
 build:
   stage: build
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
   script:
+    - echo "Connexion au registre..."
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Construction de l'image Docker..."
     - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG .
+    - docker images  # Vérifier que l'image est bien construite
 
 test:
   stage: test
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
   script:
-    - docker run --rm $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG pytest
+    - echo "Exécution des tests..."
+    - docker run --rm $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG pytest || exit 1
 
 deploy:
   stage: deploy
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Connexion au registre..."
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Push de l'image..."
     - docker push $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG
