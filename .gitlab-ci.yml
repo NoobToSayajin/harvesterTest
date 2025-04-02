@@ -1,33 +1,23 @@
-stages:          # List of stages for jobs, and their order of execution
+stages:
   - build
-  - push
+  - test
+  - deploy
 
 variables:
-  IMAGE_NAME: "10.2.0.106/mspr"
-  IMAGE_TAG: "latest"
-  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_IMAGE_TAG: "$(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
 
-build-image:       # This job runs in the build stage, which runs first.
+build:
   stage: build
-  image: docker:latest
-  services:
-    - name: docker:dind
-      command: ["--host=tcp://0.0.0.0:2375"]
   script:
-    - echo "Build de l'image Docker..."
-    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
-  only:
-    - main
+    - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG .
 
-push_image:
-    stage: push
-    image: docker:latest
-    services:
-      - docker:dind
-    script:
-        - echo "Connexion au registre..."
-        - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN 10.2.0.106
-        - echo "Push de l'image vers le registry..."
-        - docker push $IMAGE_NAME:$IMAGE_TAG
-    only:
-      - main
+test:
+  stage: test
+  script:
+    - docker run --rm $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG pytest
+
+deploy:
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG
