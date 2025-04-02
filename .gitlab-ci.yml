@@ -19,7 +19,7 @@ build:
   script:
     - echo "Connexion au registre..."
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - echo "Construction de l'image Docker..."
+    - echo "Construction de l'image Docker.."
     - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG .
     - docker images  # Vérifier que l'image est bien construite
 
