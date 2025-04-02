@@ -8,6 +8,9 @@ variables:
 
 build-image:       # This job runs in the build stage, which runs first.
   stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   script:
     - echo "Build de l'image Docker..."
     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
@@ -16,6 +19,9 @@ build-image:       # This job runs in the build stage, which runs first.
 
 push_image:
     stage: push
+    image: docker:latest
+    services:
+      - docker:dind
     script:
         - echo "Connexion au registre..."
         - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN 10.2.0.106
