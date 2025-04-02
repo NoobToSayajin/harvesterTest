@@ -5,12 +5,14 @@ stages:          # List of stages for jobs, and their order of execution
 variables:
   IMAGE_NAME: "10.2.0.106/mspr"
   IMAGE_TAG: "latest"
+  DOCKER_HOST: tcp://docker:2375/
 
 build-image:       # This job runs in the build stage, which runs first.
   stage: build
   image: docker:latest
   services:
-    - docker:dind
+    - name: docker:dind
+      command: ["--host=tcp://0.0.0.0:2375"]
   script:
     - echo "Build de l'image Docker..."
     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
