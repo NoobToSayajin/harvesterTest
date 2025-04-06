@@ -20,16 +20,22 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
     rm -rf Python-3.13.0*
 
 # Clone du repository contenant le code de l'application dans le dossier /app
-RUN git clone  http://172.16.2.253/mspr/harvester.git /app
+# RUN git clone  http://172.16.2.253/mspr/harvester.git /app
     
 WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
+if [ -d ".git" ]; then\n\
 echo "Récupération de la dernière version du code..."\n\
 git fetch \n\
 git pull\n\
+else\n\
+echo "Clonage du dépôt..."\n\
+git clone http://172.16.2.253/mspr/harvester.git /app\n\
+fi\n\
 echo "Création de l environement virtuel..."\n\
 python3.13 -m venv .venv\n\
+echo "Activation de l environement virtuel..."\n\
 source .venv/bin/activate\n\
 if [ -f requirements ]; then\n\
   pip install --no-cache-dir -r requirements\n\
