@@ -26,12 +26,21 @@ WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
 if [ -d ".git" ]; then\n\
-echo "Récupération de la dernière version du code..."\n\
-git fetch \n\
-git pull\n\
+  echo "Récupération de la dernière version du code..."\n\
+  git fetch \n\
+  git pull\n\
 else\n\
-echo "Clonage du dépôt..."\n\
-git clone http://172.16.2.253/mspr/harvester.git /app\n\
+  echo "Préparation au clonage du dépôt..."\n\
+  if [ -d "/app" ] && [ -n "$(ls -A /app)" ]; then\n\
+    echo "le répertoire n est pas vide..."\n\
+    mv /app/* /tmp/app\n\
+    echo "Clonage du dépôt..."\n\
+    git clone http://172.16.2.253/mspr/harvester.git /app && mv /tmp/app/* /app\n\
+    else\n\
+    echo "le répertoire est vide..."\n\
+    echo "Clonage du dépôt..."\n\
+    git clone http://172.16.2.253/mspr/harvester.git /app\n\
+  fi\n\
 fi\n\
 echo "Création de l environement virtuel..."\n\
 python3.13 -m venv .venv\n\
