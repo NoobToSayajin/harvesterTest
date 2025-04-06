@@ -11,10 +11,6 @@ docker build -t harvester:$SPECIFIC_TAG .
 docker tag harvester:$SPECIFIC_TAG mspr2025grp2/harvester:latest
 docker tag harvester:$SPECIFIC_TAG mspr2025grp2/harvester:$SPECIFIC_TAG
 
-# Créer le tag spécifique docker gitlab local
-docker tag harvester:$SPECIFIC_TAG 172.16.2.253:5001/harvester:latest
-docker tag harvester:$SPECIFIC_TAG 172.16.2.253:5001/harvester:$SPECIFIC_TAG
-
 # Pousser le tag spécifique
 docker push mspr2025grp2/harvester:$SPECIFIC_TAG
 
