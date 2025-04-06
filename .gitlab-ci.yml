@@ -5,12 +5,8 @@ stages:
 
 variables:
   # Configuration de ton registre Docker
-  REGISTRY: "10.2.0.106:5001"
-  IMAGE_NAME: "harvester"
-  TAG: "latest"
-  SSH_USER: "user"  # Remplace par ton utilisateur SSH
-  SSH_HOST: "192.168.1.100"  # Remplace par l'adresse IP de ton serveur de déploiement
-  SSH_PRIVATE_KEY: "/path/to/your/private_key"  # Remplace par le chemin de ta clé privée SSH
+  SSH_USER: "julien"  # Remplace par ton utilisateur SSH
+  SSH_HOST: "10.2.0.106"  # Remplace par l'adresse IP de ton serveur de déploiement
 
 # Étape de build
 build:
@@ -29,12 +25,16 @@ push:
 # Étape de déploiement via SSH
 deploy:
   stage: deploy
+  image: docker:latest
+  before_script:
+    - apk add --no-cache openssh  # ou apt-get install si tu es sur Debian
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Déploiement de l'image Docker sur le serveur distant"
-    # Connecte-toi en SSH et effectue le déploiement
-    - ssh -i $SSH_PRIVATE_KEY julien@10.2.0.106 "docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker stop harvester || true && docker rm harvester || true && docker run -d --name harvester $REGISTRY/$IMAGE_NAME:$TAG"
+    - ssh -i ~/.ssh/id_rsa julien@10.2.0.106 "docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker stop harvester || true && docker rm harvester || true && docker run -d --name harvester $REGISTRY/$IMAGE_NAME:$TAG"
   only:
-    - main  # Déployer uniquement si on est sur la branche 'main'
-  before_script:
-    - apt-get update -y && apt-get install -y openssh-client  # Installer le client SSH si nécessaire
-  # Assure-toi que la clé privée SSH est ajoutée aux variables GitLab sous CI/CD secrets (en tant que SSH_PRIVATE_KEY)
+    - main
+
