@@ -1,55 +1,33 @@
 stages:
   - build
-  - test
+  - push
   - deploy
 
 variables:
-  DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
-  CI_REGISTRY_IMAGE: "10.2.0.106/mspr/harvester"
-  DOCKER_HOST: "tcp://docker:2375"  # Force l'utilisation du service Docker
-  DOCKER_DRIVER: "overlay2"
+  # Configuration de ton registre Docker
+  REGISTRY: "10.2.0.106:5001"
+  IMAGE_NAME: "harvester"
+  TAG: "latest"
 
-before_script:
-  - echo "Vérification de la connexion à Docker..."
-  - docker info || exit 1
-
+# Étape de build
 build:
   stage: build
-  image: docker:24.0.2  # Assure-toi que la version est correcte
-  services:
-    - name: docker:24.0.2-dind  # Version correspondant à l'image Docker
-      alias: docker
-  variables:
-    DOCKER_TLS_CERTDIR: ""  # Désactive TLS pour éviter les erreurs
   script:
-    - echo "Connexion au registre GitLab..."
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - echo "Construction de l'image Docker..."
-    - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG .
-    - docker images  # Vérifier que l'image est bien construite
+    - docker build -t $REGISTRY/$IMAGE_NAME:$TAG .
 
-test:
-  stage: test
-  image: docker:24.0.2
-  services:
-    - name: docker:24.0.2-dind
-      alias: docker
-  variables:
-    DOCKER_TLS_CERTDIR: ""
+# Étape de push (pousser l'image vers le registre Docker)
+push:
+  stage: push
   script:
-    - echo "Exécution des tests..."
-    - docker run --rm $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG pytest || exit 1
+    - docker push $REGISTRY/$IMAGE_NAME:$TAG
+  only:
+    - main  # Pousser l'image uniquement si on est sur la branche 'main' (ou 'master')
 
+# Étape de déploiement (optionnel, selon ton besoin)
 deploy:
   stage: deploy
-  image: docker:24.0.2
-  services:
-    - name: docker:24.0.2-dind
-      alias: docker
-  variables:
-    DOCKER_TLS_CERTDIR: ""
   script:
-    - echo "Connexion au registre..."
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - echo "Push de l'image..."
-    - docker push $CI_REGISTRY_IMAGE:$DOCKER_IMAGE_TAG
+    - echo "Déploiement de l'image sur le serveur ou dans un environnement de staging..."
+    - ssh julien@10.2.0.106 'docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
+  only:
+    - main
