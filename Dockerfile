@@ -49,6 +49,7 @@ python3.13 -m venv .venv\n\
 echo "Activation de l environement virtuel..."\n\
 source .venv/bin/activate\n\
 if [ -f requirements ]; then\n\
+  echo "Installation des dépendances..."\n\
   pip install --no-cache-dir -r requirements\n\
 else\n\
   echo "Fichier requirements manquant"\n\
