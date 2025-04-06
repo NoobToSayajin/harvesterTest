@@ -8,6 +8,9 @@ variables:
   REGISTRY: "10.2.0.106:5001"
   IMAGE_NAME: "harvester"
   TAG: "latest"
+  SSH_USER: "user"  # Remplace par ton utilisateur SSH
+  SSH_HOST: "192.168.1.100"  # Remplace par l'adresse IP de ton serveur de déploiement
+  SSH_PRIVATE_KEY: "/path/to/your/private_key"  # Remplace par le chemin de ta clé privée SSH
 
 # Étape de build
 build:
@@ -23,16 +26,15 @@ push:
   only:
     - main  # Pousser l'image uniquement si on est sur la branche 'main' (ou 'master')
 
-# Étape de déploiement (optionnel, selon ton besoin)
+# Étape de déploiement via SSH
 deploy:
   stage: deploy
   script:
-    - echo "$SSH_PRIVATE_KEY" > /tmp/private_key && chmod 600 /tmp/private_key
-    - eval $(ssh-agent -s) && ssh-add /tmp/private_key
-    - ssh -o StrictHostKeyChecking=no julien@10.2.0.106 \
-        'export REGISTRY="$REGISTRY" IMAGE_NAME="$IMAGE_NAME" TAG="$TAG" SUDO_PASSWORD="$SUDO_PASSWORD" && \
-        printf "%s" "$SUDO_PASSWORD" | sudo -S docker --version && \
-        printf "%s" "$SUDO_PASSWORD" | sudo -S docker pull $REGISTRY/$IMAGE_NAME:$TAG && \
-        printf "%s" "$SUDO_PASSWORD" | sudo -S docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
+    - echo "Déploiement de l'image Docker sur le serveur distant"
+    # Connecte-toi en SSH et effectue le déploiement
+    - ssh -i $SSH_PRIVATE_KEY julien@10.2.0.106 "docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker stop harvester || true && docker rm harvester || true && docker run -d --name harvester $REGISTRY/$IMAGE_NAME:$TAG"
   only:
-    - main
+    - main  # Déployer uniquement si on est sur la branche 'main'
+  before_script:
+    - apt-get update -y && apt-get install -y openssh-client  # Installer le client SSH si nécessaire
+  # Assure-toi que la clé privée SSH est ajoutée aux variables GitLab sous CI/CD secrets (en tant que SSH_PRIVATE_KEY)
