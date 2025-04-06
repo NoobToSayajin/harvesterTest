@@ -31,7 +31,9 @@ deploy:
     - eval $(ssh-agent -s) && ssh-add /tmp/private_key
     - ssh -o StrictHostKeyChecking=no julien@10.2.0.106 \
         'export REGISTRY="$REGISTRY" IMAGE_NAME="$IMAGE_NAME" TAG="$TAG" && \
+        docker --version && \
         docker pull $REGISTRY/$IMAGE_NAME:$TAG && \
         docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
   only:
     - main
+
