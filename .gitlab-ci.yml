@@ -3,11 +3,6 @@ stages:
   - push
   - deploy
 
-variables:
-  # Configuration de ton registre Docker
-  SSH_USER: "julien"  # Remplace par ton utilisateur SSH
-  SSH_HOST: "10.2.0.106"  # Remplace par l'adresse IP de ton serveur de déploiement
-
 # Étape de build
 build:
   stage: build
@@ -34,7 +29,7 @@ deploy:
     - ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Déploiement de l'image Docker sur le serveur distant"
-    - ssh -i ~/.ssh/id_rsa julien@10.2.0.106 "docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker stop harvester || true && docker rm harvester || true && docker run -d --name harvester $REGISTRY/$IMAGE_NAME:$TAG"
+    - ssh -i ~/.ssh/id_rsa $SSH_USER@$SSH_HOST "docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker stop harvester || true && docker rm harvester || true && docker run -d --name harvester $REGISTRY/$IMAGE_NAME:$TAG"
   only:
     - main
 
