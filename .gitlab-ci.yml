@@ -30,11 +30,8 @@ deploy:
     - echo "$SSH_PRIVATE_KEY" > /tmp/private_key && chmod 600 /tmp/private_key
     - eval $(ssh-agent -s) && ssh-add /tmp/private_key
     - ssh -o StrictHostKeyChecking=no julien@10.2.0.106 \
-        'export REGISTRY="$REGISTRY" IMAGE_NAME="$IMAGE_NAME" TAG="$TAG" && \
-        sudo docker --version && \
-        sudo docker pull $REGISTRY/$IMAGE_NAME:$TAG && \
-        sudo docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
+        'echo "$SUDO_PASSWORD" | sudo -S docker --version && \
+         echo "$SUDO_PASSWORD" | sudo -S docker pull $REGISTRY/$IMAGE_NAME:$TAG && \
+         echo "$SUDO_PASSWORD" | sudo -S docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
   only:
     - main
-
-
