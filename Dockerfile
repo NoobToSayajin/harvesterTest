@@ -21,7 +21,9 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
 
 # Clone du repository contenant le code de l'application dans le dossier /app
 # RUN git clone  http://172.16.2.253/mspr/harvester.git /app
-    
+
+RUN mkdir -p /data/Scans
+
 WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
@@ -68,6 +70,8 @@ echo "Starting websockify..."\n\
 websockify --web /usr/share/novnc/ 5901 localhost:5900 &\n\
 echo "Starting the application..."\n\
 python3.13 main.py' > /start.sh
+
+RUN ln -s /app/Scans /data/Scans
 
 RUN chmod +x /start.sh
 
