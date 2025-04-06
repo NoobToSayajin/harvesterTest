@@ -27,7 +27,8 @@ push:
 deploy:
   stage: deploy
   script:
-    - echo "Déploiement de l'image sur le serveur ou dans un environnement de staging..."
-    - ssh julien@10.2.0.106 'docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
+    - echo "$SSH_PRIVATE_KEY" > /tmp/private_key && chmod 600 /tmp/private_key
+    - eval $(ssh-agent -s) && ssh-add /tmp/private_key
+    - ssh -o StrictHostKeyChecking=no julien@10.2.0.106 'docker pull $REGISTRY/$IMAGE_NAME:$TAG && docker run -d --name $IMAGE_NAME $REGISTRY/$IMAGE_NAME:$TAG'
   only:
     - main
