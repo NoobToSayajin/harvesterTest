@@ -28,6 +28,7 @@ RUN echo '#!/bin/bash\n\
 echo "Récupération de la dernière version du code..."\n\
 git fetch \n\
 git pull\n\
+echo "Création de l environement virtuel..."\n\
 python3.13 -m venv .venv\n\
 source .venv/bin/activate\n\
 if [ -f requirements ]; then\n\
