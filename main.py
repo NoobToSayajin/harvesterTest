@@ -520,4 +520,5 @@ root.after(1000, getLatencyGoogle)
 
 # -------------------- loop --------------------
 
-root.mainloop()  # Boucle principale pour maintenir l'interface open
+if __name__ == "__main__":
+    root.mainloop()  # Boucle principale pour maintenir l'interface open
