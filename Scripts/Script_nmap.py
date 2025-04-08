@@ -28,6 +28,7 @@ class Scan:
             "--script smb-os-discovery "  # Script pour détecter les infos Windows via SMB
             "-O --osscan-guess "  # Détection d'OS avec estimation
             "-T4 "  # Timing agressif pour un scan rapide
+            "-R"
             "-p 1-1024 "  # Scan des ports 1 à 1024 (ajustez cette plage si nécessaire)
             "--min-hostgroup=32 --min-parallelism=10 "  # Optimisation de la vitesse
         )
