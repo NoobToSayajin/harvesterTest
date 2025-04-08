@@ -32,6 +32,9 @@ else\n\
   echo "Préparation au clonage du dépôt..."\n\
   if [ -d "/app" ] && [ -n "$(ls -A /app)" ]; then\n\
     echo "le répertoire n est pas vide..."\n\
+    mkdir /tmp/app ; mv /app/* /tmp/appr m-fr /app/*\n\
+    echo "Clonage du dépôt..."\n\
+    git clone http://172.16.2.253/mspr/harvester.git /app && mv /tmp/app/* /app\n\
   else\n\
     echo "le répertoire est vide..."\n\
     echo "Clonage du dépôt..."\n\
