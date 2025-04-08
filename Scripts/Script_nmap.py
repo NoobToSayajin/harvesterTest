@@ -24,7 +24,8 @@ class Scan:
         self.__targets: list[str] = targets
         self.__scanner: nmap.PortScanner = nmap.PortScanner()
         self.__options: str = (
-            "-sS -A "  # Scan SYN + détection avancée (OS, version, scripts NSE)
+            "-sS " # Scan SYN (stealth scan)
+            "-A "  # détection avancée (OS, version, scripts NSE)
             "--script smb-os-discovery "  # Script pour détecter les infos Windows via SMB
             "-O --osscan-guess "  # Détection d'OS avec estimation
             "-T4 "  # Timing agressif pour un scan rapide
