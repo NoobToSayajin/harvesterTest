@@ -24,6 +24,7 @@ RUN mkdir -p /data/Scans
 WORKDIR /app
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
+echo "Démarrage du conteneur..."\n\
 if [ -d ".git" ]; then\n\
   echo "Récupération de la dernière version du code..."\n\
   git fetch \n\
