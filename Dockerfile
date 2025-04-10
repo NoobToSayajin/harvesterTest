@@ -22,26 +22,11 @@ RUN curl -O https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz && \
 RUN mkdir -p /data/Scans
 
 WORKDIR /app
+
+RUN git clone http://172.16.2.253/mspr/harvester.git /app || git clone http://172.16.2.253/mspr/harvester.git /app
+
 # Script de démarrage
 RUN echo '#!/bin/bash\n\
-echo "Démarrage du conteneur..."\n\
-if [ -d ".git" ]; then\n\
-  echo "Récupération de la dernière version du code..."\n\
-  git fetch \n\
-  git pull\n\
-else\n\
-  echo "Préparation au clonage du dépôt..."\n\
-  if [ -d "/app" ] && [ -n "$(ls -A /app)" ]; then\n\
-    echo "le répertoire n est pas vide..."\n\
-    mkdir /tmp/app ; mv /app/* /tmp/appr m-fr /app/*\n\
-    echo "Clonage du dépôt..."\n\
-    git clone http://172.16.2.253/mspr/harvester.git /app && mv /tmp/app/* /app\n\
-  else\n\
-    echo "le répertoire est vide..."\n\
-    echo "Clonage du dépôt..."\n\
-    git clone http://172.16.2.253/mspr/harvester.git /app\n\
-  fi\n\
-fi\n\
 echo "Création de l environement virtuel..."\n\
 python3.13 -m venv .venv\n\
 echo "Activation de l environement virtuel..."\n\
