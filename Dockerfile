@@ -55,6 +55,7 @@ websockify --web /usr/share/novnc/ 5901 localhost:5900 &\n\
 echo "Starting the application..."\n\
 python3.13 main.py' > /start.sh
 
+RUN echo "création du lien symbolique"
 RUN ln -s /data/Scans /app/Scans
 
 RUN chmod +x /start.sh
